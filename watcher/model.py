@@ -43,6 +43,25 @@ def build_model():
             f"Anthropic API · {model_id}"
         )
 
+    if provider == "mnemosyne":
+        # Mnemosyne's own loopback brain proxy: an OpenAI-compatible endpoint
+        # serving the inference the human already pays for, metered and capped
+        # by the host. The agent's brain and its memory then come from the same
+        # machine, and no provider key is ever copied into this repository.
+        from strands.models.openai import OpenAIModel
+
+        key = os.environ.get("MNEMO_PROXY_KEY")
+        if not key:
+            raise ModelUnavailable(
+                "MODEL_PROVIDER=mnemosyne but MNEMO_PROXY_KEY is not set. "
+                "Mnemosyne OS > Settings > Hermes shows the brain-proxy block."
+            )
+        base_url = os.environ.get("MNEMO_PROXY_URL", "http://127.0.0.1:7439/v1")
+        model_id = os.environ.get("MNEMO_PROXY_MODEL", "mnemosyne")
+        return OpenAIModel(
+            client_args={"api_key": key, "base_url": base_url}, model_id=model_id
+        ), f"Mnemosyne brain proxy · {model_id} · {base_url}"
+
     if provider == "ollama":
         from strands.models.ollama import OllamaModel
 
@@ -53,5 +72,6 @@ def build_model():
         )
 
     raise ModelUnavailable(
-        f"Unknown MODEL_PROVIDER {provider!r}. Use bedrock, anthropic or ollama."
+        f"Unknown MODEL_PROVIDER {provider!r}. "
+        "Use bedrock, anthropic, mnemosyne or ollama."
     )

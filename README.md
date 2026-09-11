@@ -107,15 +107,27 @@ python -m watcher                     # the standup
 python -m watcher "what did I decide about the updater?"
 ```
 
-The model provider is one declared variable, never guessed:
+The model provider is one declared variable, never guessed. A provider that
+cannot be built says so and stops; it is never silently swapped for another,
+because a demo that quietly ran on a different model proves nothing.
 
 ```bash
-MODEL_PROVIDER=bedrock    # default. AWS_REGION, BEDROCK_MODEL_ID
-MODEL_PROVIDER=anthropic  # ANTHROPIC_API_KEY
-MODEL_PROVIDER=ollama     # runs the whole thing offline
+MODEL_PROVIDER=bedrock    # default.   AWS_REGION, BEDROCK_MODEL_ID
+MODEL_PROVIDER=anthropic  #            ANTHROPIC_API_KEY
+MODEL_PROVIDER=mnemosyne  #            MNEMO_PROXY_KEY
+MODEL_PROVIDER=ollama     # offline.   OLLAMA_HOST, OLLAMA_MODEL_ID
 ```
 
-`MODEL_PROVIDER=ollama` is not a fallback, it is the point: with a local model,
+Two of those are worth a sentence.
+
+`mnemosyne` routes inference through Mnemosyne's own loopback brain proxy, an
+OpenAI-compatible endpoint on `127.0.0.1:7439` that serves the inference the
+human already pays for, metered and capped by the host. The agent's brain and
+its memory then come from the same machine, and **no provider key is ever copied
+into this repository** — the key stays sealed in the OS keystore where the app
+put it.
+
+`ollama` is not a fallback, it is the end of the argument: with a local model,
 nothing about your machine, your repositories or your decisions leaves it.
 
 ## Disclosure of pre-existing work

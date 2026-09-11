@@ -7,10 +7,34 @@ to the agent, so the same binary is both the demo and a REPL.
 
 from __future__ import annotations
 
+import os
 import sys
+from pathlib import Path
 
 from .agent import watcher_agent
 from .model import ModelUnavailable
+
+
+def _load_dotenv() -> None:
+    """Read KEY=value lines from a local .env, without overriding the shell.
+
+    No dependency, and no secret leaves this process: the file is gitignored and
+    its values only ever reach os.environ.
+    """
+    path = Path(__file__).resolve().parent.parent / ".env"
+    if not path.is_file():
+        return
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        # The shell wins: an exported value is a deliberate override.
+        if key and key not in os.environ:
+            os.environ[key] = value
+
 
 STANDUP = (
     "Give me the standup for this machine. Which coding-agent sessions are "
@@ -22,6 +46,7 @@ STANDUP = (
 
 
 def main() -> int:
+    _load_dotenv()
     prompt = " ".join(sys.argv[1:]).strip() or STANDUP
     try:
         with watcher_agent() as (agent, info):
