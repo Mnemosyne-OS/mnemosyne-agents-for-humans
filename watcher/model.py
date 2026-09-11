@@ -54,7 +54,7 @@ def build_model():
         if not key:
             raise ModelUnavailable(
                 "MODEL_PROVIDER=mnemosyne but MNEMO_PROXY_KEY is not set. "
-                "Mnemosyne OS > Settings > Hermes shows the brain-proxy block."
+                "The MnemoHermes cartridge shows the brain-proxy paste block."
             )
         base_url = os.environ.get("MNEMO_PROXY_URL", "http://127.0.0.1:7439/v1")
         model_id = os.environ.get("MNEMO_PROXY_MODEL", "mnemosyne")
