@@ -102,10 +102,17 @@ the three write surfaces), Node 18+ and Python 3.11+.
 
 ```bash
 python -m venv .venv && .venv/bin/pip install -r requirements.txt
-export ANTHROPIC_API_KEY=...          # or use Bedrock / Ollama, see below
+./setup-key.ps1                       # masked prompt, writes .env, verifies it
 python -m watcher                     # the standup
 python -m watcher "what did I decide about the updater?"
 ```
+
+`setup-key.ps1` reads the key into a SecureString, so it never reaches the
+terminal scrollback, the shell history, or a screen recording. It writes the
+gitignored `.env`, then calls the endpoint that will actually be used and tells
+you which of the two failures you have: a proxy that is not listening and a key
+that was refused are different problems with different fixes. On any other
+platform, copy `.env.example` to `.env` by hand.
 
 The model provider is one declared variable, never guessed. A provider that
 cannot be built says so and stops; it is never silently swapped for another,
