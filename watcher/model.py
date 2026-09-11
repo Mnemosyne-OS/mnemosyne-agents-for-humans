@@ -39,8 +39,21 @@ def build_model():
                 "MODEL_PROVIDER=anthropic but ANTHROPIC_API_KEY is not set."
             )
         model_id = os.environ.get("ANTHROPIC_MODEL_ID", "claude-sonnet-4-5-20250929")
-        return AnthropicModel(client_args={"api_key": key}, model_id=model_id), (
+        # This provider has no default for max_tokens: leaving it out raises
+        # KeyError on the first call, not at construction time.
+        max_tokens = int(os.environ.get("ANTHROPIC_MAX_TOKENS", "4096"))
+        client_args: dict = {"api_key": key}
+        # An organisation-level key is not scoped to a workspace, and the API
+        # then rejects the call unless this header names one. The id is not a
+        # secret; it is shown in the Anthropic console next to the workspace.
+        workspace = os.environ.get("ANTHROPIC_WORKSPACE_ID", "").strip()
+        if workspace:
+            client_args["default_headers"] = {"anthropic-workspace-id": workspace}
+        return AnthropicModel(
+            client_args=client_args, model_id=model_id, max_tokens=max_tokens
+        ), (
             f"Anthropic API · {model_id}"
+            + (f" · workspace {workspace}" if workspace else "")
         )
 
     if provider == "mnemosyne":
