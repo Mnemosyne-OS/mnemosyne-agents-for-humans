@@ -46,13 +46,21 @@ STANDUP = (
 
 
 def main() -> int:
+    # The Windows console is cp1252 by default and the model writes emoji.
+    # Without this, a run that completed every tool call dies on its last
+    # print and reads as a total failure.
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, 'reconfigure', None)
+        if reconfigure:
+            reconfigure(encoding='utf-8', errors='replace')
     _load_dotenv()
     prompt = " ".join(sys.argv[1:]).strip() or STANDUP
     try:
         with watcher_agent() as (agent, info):
             print(
                 f"model: {info['model']}\n"
-                f"mcp:   {info['mcp']} ({info['tools']} tools)\n",
+                f"mcp:   {info['mcp']} ({info['tools']} tools, "
+                f"{info['patched']} schema-patched)\n",
                 flush=True,
             )
             agent(prompt)
