@@ -1,6 +1,9 @@
 """Connectivity check: no model, no credentials. Proves Python -> npx -> MCP."""
 import sys
 
+import sys, pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+
 from watcher.agent import mnemosyne_client, MCP_PACKAGE
 
 client = mnemosyne_client()

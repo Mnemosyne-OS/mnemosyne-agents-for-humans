@@ -12,6 +12,9 @@ import re
 import urllib.error
 import urllib.request
 
+import sys, pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+
 from watcher.agent import mnemosyne_client
 
 URL = "http://127.0.0.1:7439/v1/chat/completions"
