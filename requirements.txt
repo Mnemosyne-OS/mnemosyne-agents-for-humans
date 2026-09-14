@@ -1,2 +1,2 @@
-strands-agents[anthropic,openai]>=1.55.0
+strands-agents[anthropic,openai,ollama]>=1.55.0
 strands-agents-tools>=0.8.0

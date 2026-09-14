@@ -103,11 +103,26 @@ Requires [Mnemosyne OS](https://mnemosyne-os.io) running (it owns the memory and
 the three write surfaces), Node 18+ and Python 3.11+.
 
 ```bash
-python -m venv .venv && .venv/bin/pip install -r requirements.txt
-./setup-key.ps1                       # masked prompt, writes .env, verifies it
+python -m venv .venv && .venv/bin/pip install -r requirements.txt   # Windows: .venv\Scripts\pip
+cp .env.example .env                  # pick ONE provider (or ./setup-key.ps1 on Windows)
 python -m watcher                     # the standup
 python -m watcher "what did I decide about the updater?"
 ```
+
+Fastest path on a machine that has no key of any kind: install
+[Ollama](https://ollama.com), `ollama pull qwen3:8b`, and set
+`MODEL_PROVIDER=ollama` in `.env`. With AWS credentials in the environment,
+leaving `.env` out entirely runs on Amazon Bedrock, the default.
+
+The first run downloads `@mnemosyne_os/mcp` through npx (about 20 seconds,
+cached afterwards). The three things that can stop a fresh machine are named
+on stderr and exit with their own code, before anything else starts:
+
+| Message | Exit | What it means |
+|---|---|---|
+| `model unavailable: …` | 2 | the declared provider cannot be built (no key, no AWS credentials, unknown name) |
+| `mcp unavailable: …` | 3 | Mnemosyne OS is not running, or npx could not fetch the MCP package |
+| `run failed: …` | 1 | anything else, with the real exception name |
 
 `setup-key.ps1` reads the key into a SecureString, so it never reaches the
 terminal scrollback, the shell history, or a screen recording. It writes the

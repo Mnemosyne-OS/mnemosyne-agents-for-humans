@@ -26,6 +26,18 @@ def build_model():
             "BEDROCK_MODEL_ID", "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
         )
         region = os.environ.get("AWS_REGION", "us-east-1")
+        # BedrockModel builds lazily: with no AWS credentials the first failure
+        # would surface as a bare NoCredentialsError AFTER the MCP server has
+        # been downloaded and connected. Probe the credential chain here so the
+        # verdict is named before anything else starts.
+        import boto3
+
+        if boto3.Session(region_name=region).get_credentials() is None:
+            raise ModelUnavailable(
+                "MODEL_PROVIDER=bedrock (the default) but no AWS credentials were "
+                "found: set AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY or AWS_PROFILE, "
+                "or pick another provider in .env (anthropic, ollama, mnemosyne)."
+            )
         return BedrockModel(model_id=model_id, region_name=region), (
             f"Amazon Bedrock · {model_id} · {region}"
         )

@@ -11,6 +11,8 @@ import os
 import sys
 from pathlib import Path
 
+from strands.types.exceptions import MCPClientInitializationError
+
 from .agent import watcher_agent
 from .model import ModelUnavailable
 
@@ -69,6 +71,19 @@ def main() -> int:
         # a demo that quietly ran on a different model proves nothing.
         print(f"model unavailable: {exc}", file=sys.stderr)
         return 2
+    except MCPClientInitializationError:
+        # The MCP server could not start or did not answer. Its own stderr is
+        # printed above this line; name the two causes a fresh machine hits.
+        print(
+            "mcp unavailable: the Mnemosyne MCP server did not come up.",
+            "  - Mnemosyne OS is not running (nothing listens on ws://127.0.0.1:7799):"
+            " start the app, then run again.",
+            "  - or npx could not fetch @mnemosyne_os/mcp: Node 18+ and network are"
+            " needed for the first run (about 20 s), cached afterwards.",
+            sep="\n",
+            file=sys.stderr,
+        )
+        return 3
     except Exception as exc:  # noqa: BLE001 - surface the real reason, then exit
         print(f"run failed: {type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
