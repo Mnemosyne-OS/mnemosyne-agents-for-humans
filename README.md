@@ -1,5 +1,7 @@
 # Watcher — the agent that tells you what your other agents did
 
+**Demo video (2 min 43):** https://youtu.be/jSU2gm1HrkY
+
 You run several coding agents at once. By the evening you have four sessions
 across three repositories and no idea which of them touched what, which one is
 still alive, or whether two of them are about to commit over each other.
